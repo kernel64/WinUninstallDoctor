@@ -14,6 +14,14 @@ public class MainForm : Form
     private ProgressBar progressBarScan;
     private Label lblStatus;
 
+    private TextBox txtSearch;
+    private CheckBox chkOnlyBroken;
+    private CheckBox chkHideSystem;
+    private CheckBox chkOnlySelectable;
+
+    List<ProgramEntry> allPrograms;
+    List<ProgramEntry> filteredPrograms;
+
     private readonly List<ProgramEntry> programs = new();
 
     public MainForm()
@@ -27,6 +35,12 @@ public class MainForm : Form
         Width = 1100;
         Height = 750;
         StartPosition = FormStartPosition.CenterScreen;
+
+        FormBorderStyle = FormBorderStyle.FixedSingle;
+        MaximizeBox = false;
+        MinimumSize = new Size(Width, Height);
+        MaximumSize = new Size(Width, Height);
+
 
         btnScan = new Button
         {
@@ -63,13 +77,39 @@ public class MainForm : Form
 
         flpPrograms = new FlowLayoutPanel
         {
-            Location = new Point(15, 60),
+            Location = new Point(15, 107),
             Width = ClientSize.Width - 30,
             Height = ClientSize.Height - 80,
             AutoScroll = true,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
-            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+            Anchor = AnchorStyles.Top  | AnchorStyles.Left | AnchorStyles.Right
+        };
+
+
+        txtSearch = new TextBox
+        {
+            PlaceholderText = "Search programs...",
+            Width = 300,
+           
+            Location = new Point(15, 62)
+        };
+
+        chkOnlyBroken = new CheckBox
+        {
+            Text = "Only broken entries",
+            Width = 300,
+            Height = 30,
+            Location = new Point(330, 65)
+        };
+
+        chkHideSystem = new CheckBox
+        {
+            Text = "Hide system components",
+            Width = 300,
+            Height = 30,
+            Location = new Point(630, 65),
+            Checked = true
         };
 
         Controls.AddRange(new Control[]
@@ -78,9 +118,29 @@ public class MainForm : Form
             btnDeleteSelected,
             progressBarScan,
             lblStatus,
-            flpPrograms
+            flpPrograms,
+            txtSearch,
+            chkOnlyBroken,
+            chkHideSystem
         });
     }
+
+    void AdjustFlowLayoutHeight()
+    {
+        int totalHeight = 0;
+
+        foreach (Control c in flpPrograms.Controls)
+            totalHeight += c.Height + c.Margin.Vertical;
+
+        // Add small padding
+        totalHeight += 5;
+
+        flpPrograms.Height = Math.Min(
+            totalHeight,
+            ClientSize.Height - flpPrograms.Top - 10
+        );
+    }
+
 
     private async Task StartScanAsync()
     {
@@ -93,6 +153,8 @@ public class MainForm : Form
         progressBarScan.Value = 0;
 
         await Task.Run(ScanPrograms);
+
+        AdjustFlowLayoutHeight();
 
         lblStatus.Text = $"Scan finished ({programs.Count} programs)";
         btnScan.Enabled = true;

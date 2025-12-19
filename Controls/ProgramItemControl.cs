@@ -32,49 +32,49 @@ public class ProgramItemControl : UserControl
         Margin = new Padding(2);
         BackColor = Color.White;
 
+        chkSelect = new CheckBox
+        {
+            Location = new Point(10, 22),
+            Enabled = false
+        };
+        chkSelect.CheckedChanged += (_, _) => SelectionChanged?.Invoke();
+
         picIcon = new PictureBox
         {
-            Size = new Size(32, 32),
-            Location = new Point(10, 16),
+            Size = new Size(48, 48),
+            Location = new Point(40, 8),
             SizeMode = PictureBoxSizeMode.CenterImage
         };
 
         lblName = new Label
         {
-            Location = new Point(55, 6),
+            Location = new Point(95, 6),
             AutoSize = false,
             Width = 420,
-            Height = 20,
+            Height = 25,
             Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
         };
 
         lblVersion = new Label
         {
-            Location = new Point(55, 30),
+            Location = new Point(95, 32),
             Width = 120,
             ForeColor = Color.DimGray
         };
 
         lblPublisher = new Label
         {
-            Location = new Point(180, 30),
+            Location = new Point(180, 32),
             Width = 260,
             ForeColor = Color.DimGray
         };
-
-        chkSelect = new CheckBox
-        {
-            Location = new Point(460, 22),
-            Visible = false
-        };
-        chkSelect.CheckedChanged += (_, _) => SelectionChanged?.Invoke();
 
         btnFixPath = new Button
         {
             Text = "Fix path",
             Width = 80,
-            Height = 28,
-            Location = new Point(520, 18),
+            Height = 33,
+            Location = new Point(810, 14),
             Visible = false
         };
         btnFixPath.Click += BtnFixPath_Click;
@@ -83,8 +83,8 @@ public class ProgramItemControl : UserControl
         {
             Text = "Delete",
             Width = 80,
-            Height = 28,
-            Location = new Point(610, 18),
+            Height = 33,
+            Location = new Point(900, 14),
             Visible = false
         };
         btnDelete.Click += BtnDelete_Click;
@@ -117,7 +117,7 @@ public class ProgramItemControl : UserControl
 
         bool broken = !entry.UninstallExists;
 
-        chkSelect.Visible = broken;
+        chkSelect.Enabled = broken;
         btnDelete.Visible = broken;
         btnFixPath.Visible = broken;
 
