@@ -7,4 +7,7 @@ public class ProgramEntry
     public string DisplayIcon { get; set; }
     public string RegistryKeyPath { get; set; }
     public bool UninstallExists { get; set; }
+    public bool HasProblem { get; set; }
+    public bool IsSystemComponent { get; set; }
+    public bool IsSelectable { get; set; }
 }

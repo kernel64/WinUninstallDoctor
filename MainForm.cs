@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WinUninstallDoctor;
 
 public class MainForm : Form
 {
@@ -14,15 +16,14 @@ public class MainForm : Form
     private ProgressBar progressBarScan;
     private Label lblStatus;
 
+    private Label lblFilterCounter;
     private TextBox txtSearch;
     private CheckBox chkOnlyBroken;
     private CheckBox chkHideSystem;
     private CheckBox chkOnlySelectable;
 
-    List<ProgramEntry> allPrograms;
-    List<ProgramEntry> filteredPrograms;
-
-    private readonly List<ProgramEntry> programs = new();
+    private readonly List<ProgramEntry> allPrograms = new();
+    private List<ProgramEntry> filteredPrograms = new();
 
     public MainForm()
     {
@@ -41,13 +42,16 @@ public class MainForm : Form
         MinimumSize = new Size(Width, Height);
         MaximumSize = new Size(Width, Height);
 
+        var stream = new MemoryStream(WinUninstallDoctor.Properties.Resources.icon);
+        
+        Icon = new Icon(stream);
 
         btnScan = new Button
         {
             Text = "Scan programs",
             Width = 140,
             Height = 32,
-            Location = new Point(15, 15)
+            Location = new Point(15, 40)
         };
         btnScan.Click += async (_, _) => await StartScanAsync();
 
@@ -56,14 +60,14 @@ public class MainForm : Form
             Text = "Delete selected",
             Width = 150,
             Height = 32,
-            Location = new Point(165, 15),
+            Location = new Point(165, 40),
             Enabled = false
         };
         btnDeleteSelected.Click += BtnDeleteSelected_Click;
 
         progressBarScan = new ProgressBar
         {
-            Location = new Point(330, 20),
+            Location = new Point(330, 45),
             Width = 350,
             Height = 22
         };
@@ -71,19 +75,19 @@ public class MainForm : Form
         lblStatus = new Label
         {
             Text = "Idle",
-            Location = new Point(700, 22),
+            Location = new Point(700, 47),
             AutoSize = true
         };
 
         flpPrograms = new FlowLayoutPanel
         {
-            Location = new Point(15, 107),
+            Location = new Point(15, 132),
             Width = ClientSize.Width - 30,
             Height = ClientSize.Height - 80,
             AutoScroll = true,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
-            Anchor = AnchorStyles.Top  | AnchorStyles.Left | AnchorStyles.Right
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
 
@@ -91,29 +95,55 @@ public class MainForm : Form
         {
             PlaceholderText = "Search programs...",
             Width = 300,
-           
-            Location = new Point(15, 62)
+            Enabled = false,
+            Location = new Point(15, 87)
         };
 
         chkOnlyBroken = new CheckBox
         {
-            Text = "Only broken entries",
-            Width = 300,
+            Text = "Only broken",
+            Width = 150,
             Height = 30,
-            Location = new Point(330, 65)
+            Enabled = false,
+            Location = new Point(330, 90)
         };
 
         chkHideSystem = new CheckBox
         {
             Text = "Hide system components",
-            Width = 300,
+            Width = 240,
             Height = 30,
-            Location = new Point(630, 65),
-            Checked = true
+            Enabled = false,
+            Location = new Point(500, 90),
         };
+
+        lblFilterCounter = new Label
+        {
+            Text = "",
+            Location = new Point(740, 90),
+            AutoSize = true
+        };
+
+
+        MenuStrip menu = new MenuStrip();
+
+        ToolStripMenuItem helpMenu = new ToolStripMenuItem("Help");
+        ToolStripMenuItem aboutItem = new ToolStripMenuItem("About WinUninstallDoctor");
+
+        aboutItem.Click += (_, _) =>
+        {
+            using var about = new AboutForm();
+            about.ShowDialog(this);
+        };
+
+        helpMenu.DropDownItems.Add(aboutItem);
+        menu.Items.Add(helpMenu);
+
+        MainMenuStrip = menu;
 
         Controls.AddRange(new Control[]
         {
+            menu,
             btnScan,
             btnDeleteSelected,
             progressBarScan,
@@ -121,8 +151,15 @@ public class MainForm : Form
             flpPrograms,
             txtSearch,
             chkOnlyBroken,
-            chkHideSystem
+            chkHideSystem,
+            lblFilterCounter
         });
+
+        txtSearch.TextChanged += (_, _) => ApplyFilters();
+        chkOnlyBroken.CheckedChanged += (_, _) => ApplyFilters();
+        chkHideSystem.CheckedChanged += (_, _) => ApplyFilters();
+
+
     }
 
     void AdjustFlowLayoutHeight()
@@ -147,7 +184,8 @@ public class MainForm : Form
         btnScan.Enabled = false;
         btnDeleteSelected.Enabled = false;
         flpPrograms.Controls.Clear();
-        programs.Clear();
+        allPrograms.Clear();
+        filteredPrograms.Clear();
 
         lblStatus.Text = "Scanning registry...";
         progressBarScan.Value = 0;
@@ -156,7 +194,7 @@ public class MainForm : Form
 
         AdjustFlowLayoutHeight();
 
-        lblStatus.Text = $"Scan finished ({programs.Count} programs)";
+        lblStatus.Text = $"Scan finished ({allPrograms.Count} programs)";
         btnScan.Enabled = true;
         btnDeleteSelected.Enabled = true;
     }
@@ -196,11 +234,15 @@ public class MainForm : Form
                     Publisher = appKey.GetValue("Publisher") as string,
                     UninstallString = appKey.GetValue("UninstallString") as string,
                     DisplayIcon = appKey.GetValue("DisplayIcon") as string,
-                    RegistryKeyPath = path + "\\" + subKeyName
+                    RegistryKeyPath = path + "\\" + subKeyName,
+                    IsSystemComponent = (appKey.GetValue("SystemComponent") as int? ?? 0) != 0,
+                    IsSelectable = (appKey.GetValue("NoRemove") as int? ?? 0) == 0,
+                    HasProblem = string.IsNullOrWhiteSpace(appKey.GetValue("UninstallString") as string)
+                        || !CheckUninstall(appKey.GetValue("UninstallString") as string)
                 };
 
                 entry.UninstallExists = CheckUninstall(entry.UninstallString);
-                programs.Add(entry);
+                allPrograms.Add(entry);
 
                 Invoke(() =>
                 {
@@ -208,6 +250,13 @@ public class MainForm : Form
                     // update progress bar
                     progressBarScan.Value = Math.Min(100, (++current * 100) / total);
                 });
+            }
+
+            if (allPrograms.Count > 0)
+            {
+                txtSearch.Enabled = true;
+                chkHideSystem.Enabled = true;
+                chkOnlyBroken.Enabled = true;
             }
         }
     }
@@ -289,4 +338,59 @@ public class MainForm : Form
         }
         return count;
     }
+
+    private void ApplyFilters()
+    {
+        if (allPrograms == null) return;
+
+        string search = txtSearch.Text.Trim().ToLowerInvariant();
+        filteredPrograms.Clear();
+
+        filteredPrograms = allPrograms.Where(p =>
+        {
+            // Recherche texte
+            bool matchSearch =
+                string.IsNullOrEmpty(search) ||
+                (p.DisplayName?.ToLowerInvariant().Contains(search) ?? false) ||
+                (p.Publisher?.ToLowerInvariant().Contains(search) ?? false) ||
+                (p.DisplayVersion?.ToLowerInvariant().Contains(search) ?? false);
+
+            // Programmes système
+            if (chkHideSystem.Checked && p.IsSystemComponent)
+                return false;
+
+            // Programmes cassés
+            if (chkOnlyBroken.Checked && !p.HasProblem)
+                return false;
+
+            // Sélectionnables uniquement
+            //if (chkOnlySelectable.Checked && !p.IsSelectable)
+            //    return false;
+
+            return matchSearch;
+        })
+        .ToList();
+
+        lblFilterCounter.Text = $"(Showing {filteredPrograms.Count} of {allPrograms.Count} programs)";
+        RefreshProgramList();
+    }
+
+    private void InitializeComponent()
+    {
+
+    }
+
+    private void RefreshProgramList()
+    {
+        flpPrograms.SuspendLayout();
+        flpPrograms.Controls.Clear();
+
+        foreach (var program in filteredPrograms)
+        {
+            AddProgramControl(program);
+        }
+
+        flpPrograms.ResumeLayout();
+    }
+
 }
