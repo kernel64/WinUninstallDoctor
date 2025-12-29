@@ -14,7 +14,7 @@ public class ProgramItemControl : UserControl
     private Button btnDelete;
     private Button btnFixPath;
 
-    private ProgramEntry _entry;
+    public ProgramEntry _entry { get; private set; }
 
     public event Action SelectionChanged;
 

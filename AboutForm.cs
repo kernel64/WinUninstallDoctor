@@ -81,7 +81,7 @@ namespace WinUninstallDoctor
         // Contact / footer
         var lblFooter = new Label
         {
-            Text = "Contact: support@winuninstalldoctor.app\n© 2025 WinUninstallDoctor",
+            Text = "Contact: support@mabslabs.com\n© 2025 WinUninstallDoctor",
             Font = new Font("Segoe UI", 9),
             ForeColor = Color.Gray,
             TextAlign = ContentAlignment.MiddleCenter,
@@ -113,7 +113,7 @@ namespace WinUninstallDoctor
         Controls.Add(panel);
     }
 
-    private static Image ByteArrayToImage(byte[] byteArray)
+    public static Image ByteArrayToImage(byte[] byteArray)
     {
         using (var ms = new MemoryStream(byteArray))
         {

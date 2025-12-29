@@ -73,6 +73,16 @@ namespace WinUninstallDoctor.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Byte[].
         /// </summary>
+        internal static byte[] info {
+            get {
+                object obj = ResourceManager.GetObject("info", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Byte[].
+        /// </summary>
         internal static byte[] logo {
             get {
                 object obj = ResourceManager.GetObject("logo", resourceCulture);

@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using WinUninstallDoctor;
 
 internal static class Program
 {
@@ -20,6 +21,6 @@ internal static class Program
             return;
         }
 
-        Application.Run(new MainForm());
+        Application.Run(new WinUninstallDoctor.MainForm());
     }
 }
