@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-
+using WinUninstallDoctor.Models;
 
 namespace WinUninstallDoctor
 {
@@ -22,8 +22,8 @@ namespace WinUninstallDoctor
         private CheckBox chkOnlyBroken;
         private CheckBox chkHideSystem;
 
-        private readonly List<ProgramEntry> allPrograms = new();
-        private List<ProgramEntry> filteredPrograms = new();
+        private readonly List<WinUninstallDoctor.Models.ProgramEntry> allPrograms = new();
+        private List<WinUninstallDoctor.Models.ProgramEntry> filteredPrograms = new();
 
         // Timer pour le debouncing de la recherche
         private System.Threading.Timer searchDebounceTimer;
@@ -46,9 +46,8 @@ namespace WinUninstallDoctor
             MinimumSize = new Size(Width, Height);
             MaximumSize = new Size(Width, Height);
 
-            var stream = new MemoryStream(WinUninstallDoctor.Properties.Resources.icon);
-            Icon = new Icon(stream);
-
+            Icon = Utils.LoadIconFromResource(WinUninstallDoctor.Properties.Resources.icon);
+            
             btnScan = new Button
             {
                 Text = "Scan programs",
@@ -144,7 +143,7 @@ namespace WinUninstallDoctor
                 TextAlign = ContentAlignment.MiddleCenter,
 
             };
-            btnAbout.Image = WinUninstallDoctor.AboutForm.ByteArrayToImage(WinUninstallDoctor.Properties.Resources.info);
+            btnAbout.Image = Utils.ByteArrayToImage(WinUninstallDoctor.Properties.Resources.info);
             btnAbout.ImageAlign = ContentAlignment.MiddleCenter;
             btnAbout.Text = "";
             btnAbout.FlatAppearance.BorderSize = 0;
