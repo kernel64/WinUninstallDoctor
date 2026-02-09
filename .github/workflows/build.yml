@@ -23,30 +23,37 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Publish application
-        run: dotnet publish WinUninstallDoctor.csproj -c Release -r win-x64 --self-contained false -o bin/Release/publish
-
-      - name: Install Inno Setup
+      - name: Copy logo.png for MSIX
         run: |
-          choco install innosetup -y
-          $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+          if (-not (Test-Path "WinUninstallDoctor.Package\Assets")) {
+            New-Item -ItemType Directory -Path "WinUninstallDoctor.Package\Assets" -Force | Out-Null
+          }
+          Copy-Item "Assets\logo.png" -Destination "WinUninstallDoctor.Package\Assets\logo.png" -Force
         shell: powershell
 
-      - name: Build installer
-        run: iscc installer/WinUninstallDoctor.iss
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Restore NuGet packages
+        run: dotnet restore WinUninstallDoctor.sln
+
+      - name: Build MSIX package
+        run: |
+          msbuild WinUninstallDoctor.Package\WinUninstallDoctor.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Always /p:AppxBundlePlatforms=x64 /p:UapAppxPackageBuildMode=StoreUpload /p:AppxPackageSigningEnabled=false /p:GenerateAppInstallerFile=false
         shell: cmd
 
-      - name: Verify installer exists
+      - name: Verify MSIX package exists
         run: |
-          if (-not (Test-Path "installer/output/WinUninstallDoctorSetup.exe")) {
-            Write-Error "Installer was not created!"
+          $msixPath = Get-ChildItem -Path "WinUninstallDoctor.Package\AppPackages" -Recurse -Filter "*.msix" | Select-Object -First 1
+          if (-not $msixPath) {
+            Write-Error "MSIX package was not created!"
             exit 1
           }
-          Write-Host "Installer created successfully"
+          Write-Host "MSIX package created successfully: $($msixPath.FullName)"
         shell: powershell
 
-      - name: Upload installer artifact
+      - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WinUninstallDoctorSetup
-          path: installer/output/WinUninstallDoctorSetup.exe
+          name: WinUninstallDoctorMSIX
+          path: WinUninstallDoctor.Package/AppPackages/**/*.msix

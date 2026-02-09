@@ -169,6 +169,15 @@ AutoTest.Net/
 # InnoSetup output folder
 installer/output/
 
+# MSIX/WAP output folders
+WinUninstallDoctor.Package/AppPackages/
+WinUninstallDoctor.Package/bin/
+WinUninstallDoctor.Package/obj/
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+
 # DocProject is a documentation generator add-in
 DocProject/buildhelp/
 DocProject/Help/*.HxT
