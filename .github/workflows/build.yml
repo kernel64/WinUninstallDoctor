@@ -39,7 +39,7 @@ jobs:
 
       - name: Build MSIX package
         run: |
-          dotnet msbuild WinUninstallDoctor.Package\WinUninstallDoctor.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Always /p:AppxBundlePlatforms=x64 /p:UapAppxPackageBuildMode=StoreUpload /p:AppxPackageSigningEnabled=false /p:GenerateAppInstallerFile=false
+          msbuild WinUninstallDoctor.Package\WinUninstallDoctor.Package.wapproj /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Always /p:AppxBundlePlatforms=x64 /p:UapAppxPackageBuildMode=StoreUpload /p:AppxPackageSigningEnabled=false /p:GenerateAppInstallerFile=false
         shell: cmd
 
       - name: Verify MSIX package exists
