@@ -6,7 +6,7 @@
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
   <PropertyGroup>
     <ProjectGuid>B8F5A3C2-4D9E-4F1A-8B2C-1E3D4F5A6B7C</ProjectGuid>
-    <TargetPlatformVersion>10.0.17763.7010</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.7010</TargetPlatformMinVersion>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
