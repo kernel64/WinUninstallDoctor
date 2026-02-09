@@ -1,0 +1,52 @@
+name: Build WinUninstallDoctor Installer
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Publish application
+        run: dotnet publish WinUninstallDoctor.csproj -c Release -r win-x64 --self-contained false -o bin/Release/publish
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+          $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+        shell: powershell
+
+      - name: Build installer
+        run: iscc installer/WinUninstallDoctor.iss
+        shell: cmd
+
+      - name: Verify installer exists
+        run: |
+          if (-not (Test-Path "installer/output/WinUninstallDoctorSetup.exe")) {
+            Write-Error "Installer was not created!"
+            exit 1
+          }
+          Write-Host "Installer created successfully"
+        shell: powershell
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WinUninstallDoctorSetup
+          path: installer/output/WinUninstallDoctorSetup.exe
