@@ -23,6 +23,15 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Install Windows 11 SDK (22621)
+        run: |
+          choco install windows-sdk-10.0 -y --version=10.0.19041.0
+      
+      - name: Check UAP.props
+        run: |
+          dir "C:\Program Files\Windows Kits\10\Platforms\UAP\10.0.19041.0\Platform.xml"
+          dir "C:\Program Files\Windows Kits\10\DesignTime\CommonConfiguration\Neutral\UAP.props"
+
       - name: Copy logo.png for MSIX
         run: |
           if (-not (Test-Path "WinUninstallDoctor.Package\Assets")) {
