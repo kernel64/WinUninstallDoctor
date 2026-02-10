@@ -14,6 +14,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: Search Windows SDK packages
+        run: |
+          choco search windows-sdk
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -23,14 +27,9 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Install UWP workload (Windows SDK + UAP)
+      - name: Install Windows 10 SDK (19041)
         run: |
-          & "C:\Program Files\Microsoft Visual Studio\Installer\vs_installer.exe" modify `
-          --installPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" `
-          --add Microsoft.VisualStudio.ComponentGroup.UWP.VC `
-          --add Microsoft.VisualStudio.Component.Windows10SDK.22621 `
-          --quiet --norestart --nocache
-
+          choco install windows-sdk-10.0-version-2004-all -y
 
       - name: Copy logo.png for MSIX
         run: |
