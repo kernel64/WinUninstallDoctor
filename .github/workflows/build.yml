@@ -15,6 +15,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+        with:
+          msbuild-architecture: x64
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -25,9 +30,6 @@ jobs:
          choco install windows-sdk-10.1 --version 10.1.22621.755 -y
          choco install microsoft-build-tools -y
          choco install netfx-4.8-devpack -y 
-         
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
 
       - name: Restore NuGet packages
         run: dotnet restore WinUninstallDoctor.sln
