@@ -24,15 +24,7 @@ jobs:
         run: dotnet restore
 
       - name: Install Windows SDK
-        run: choco install windows-sdk-10.0 -y --version=10.0.26624
-
-      - name: Copy logo.png for MSIX
-        run: |
-          if (-not (Test-Path "WinUninstallDoctor.Package\Assets")) {
-            New-Item -ItemType Directory -Path "WinUninstallDoctor.Package\Assets" -Force | Out-Null
-          }
-          Copy-Item "Assets\logo.png" -Destination "WinUninstallDoctor.Package\Assets\logo.png" -Force
-        shell: powershell
+        run: choco install windows-sdk-10.0 -y --version=10.0.22621
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1

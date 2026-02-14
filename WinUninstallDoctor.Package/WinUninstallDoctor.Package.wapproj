@@ -6,9 +6,9 @@
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
   <PropertyGroup>
     <ProjectGuid>B8F5A3C2-4D9E-4F1A-8B2C-1E3D4F5A6B7C</ProjectGuid>
-    <TargetPlatformVersion>10.0.26624.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <AppxBundle>Always</AppxBundle>
+    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
@@ -28,6 +28,9 @@
       <PublishReadyToRun>False</PublishReadyToRun>
       <PublishSingleFile>False</PublishSingleFile>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+	<Content Include="Assets\*.*" />
   </ItemGroup>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
 </Project>
