@@ -87,6 +87,12 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
 
+    - name: debug
+      run: |
+      dir "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP"
+      dotnet --list-sdks
+      dotnet --list-runtimes
+
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
       run: |
